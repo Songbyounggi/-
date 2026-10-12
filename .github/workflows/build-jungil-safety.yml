@@ -1,0 +1,29 @@
+name: 정일건설 안전관리 도우미 exe 빌드
+
+on:
+  push:
+    paths:
+      - "jungil_safety/**"
+      - ".github/workflows/build-jungil-safety.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r jungil_safety/requirements.txt pyinstaller
+      - name: Test
+        working-directory: jungil_safety
+        run: python -m unittest discover -s tests -v
+      - name: Build exe
+        working-directory: jungil_safety
+        run: pyinstaller --noconfirm --onefile --windowed --name JungilSafety app.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JungilSafety-windows
+          path: jungil_safety/dist/JungilSafety.exe
