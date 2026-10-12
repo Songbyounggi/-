@@ -421,8 +421,11 @@ def import_xlsx(path, aliases):
     """HPMS 에서 내려받은 엑셀 등을 읽어 dict 목록 반환 (머리글 이름으로 열 자동 매칭)."""
     from openpyxl import load_workbook
 
-    ws = load_workbook(path, data_only=True, read_only=True).active
-    rows = list(ws.iter_rows(values_only=True))
+    wb = load_workbook(path, data_only=True, read_only=True)
+    try:
+        rows = list(wb.active.iter_rows(values_only=True))
+    finally:
+        wb.close()  # read_only 모드는 닫지 않으면 Windows 에서 파일이 잠김
     for hi, row in enumerate(rows[:20]):
         mapping = {i: aliases[_norm(v)] for i, v in enumerate(row) if _norm(v) in aliases}
         if len(mapping) >= 3:
